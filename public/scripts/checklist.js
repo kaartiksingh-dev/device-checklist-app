@@ -147,3 +147,8 @@ document.addEventListener('DOMContentLoaded', () => {
     a.click();
   });
   
+  document.getElementById('finishChecklistBtn').addEventListener('click', () => {
+    alert('✅ Checklist marked as completed!');
+    window.location.href = '/history.html';
+  });
+  

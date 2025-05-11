@@ -25,6 +25,25 @@
 
 </head>
 <body class="container py-4">
+
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="index.html">📋 Device Checklist</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link" href="inventory.html">Inventory</a></li>
+          <li class="nav-item"><a class="nav-link" href="templates.html">Templates</a></li>
+          <li class="nav-item"><a class="nav-link" href="checklist.html">Start Checklist</a></li>
+          <li class="nav-item"><a class="nav-link" href="history.html">History</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+  
+
   <h1 class="mb-4">Start New Checklist</h1>
 
   <!-- Checklist Info -->
@@ -88,6 +107,7 @@
       </table>
       <div class="d-flex justify-content-end gap-2">
         <button type="submit" class="btn btn-success">Save Checklist</button>
+        <button type="button" id="finishChecklistBtn" class="btn btn-outline-primary">Finish Checklist</button>
         <button type="button" class="btn btn-outline-primary" id="exportCsvBtn">Export CSV</button>
         <button type="button" class="btn btn-outline-secondary" onclick="window.print()">Print</button>
       </div>
