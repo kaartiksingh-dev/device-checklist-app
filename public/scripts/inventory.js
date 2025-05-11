@@ -54,3 +54,23 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   });
   
+  document.getElementById('exportInventoryBtn').addEventListener('click', () => {
+    fetch('/api/devices')
+      .then(res => res.json())
+      .then(devices => {
+        const rows = [['Model Name', 'Serial Number', 'Category', 'Description']];
+        devices.forEach(d => {
+          rows.push([d.model_name, d.serial_number, d.category || '', d.description || '']);
+        });
+  
+        const csv = rows.map(r => r.map(v => `"${v}"`).join(',')).join('\n');
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+  
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'device_inventory.csv';
+        a.click();
+      });
+  });
+  
