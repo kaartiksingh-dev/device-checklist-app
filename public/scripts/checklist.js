@@ -3,13 +3,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const checklistContainer = document.getElementById('checklistContainer');
   const checklistTableBody = document.getElementById('checklistTableBody');
   const checklistDate = document.getElementById('checklistDate');
-  const saveChecklistBtn = document.getElementById('saveChecklistBtn');
-  const finishChecklistBtn = document.getElementById('finishChecklistBtn');
+  const finishBtn = document.getElementById('finishChecklistBtn');
 
   const today = new Date().toISOString().split('T')[0];
   checklistDate.value = today;
-
-  finishChecklistBtn.disabled = true;
 
   // Fetch templates
   fetch('/api/templates')
@@ -34,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
         checklistTableBody.innerHTML = '';
         devices.forEach((device, index) => {
           const row = document.createElement('tr');
-          row.dataset.deviceId = device.device_id; // 🔑 attach device_id
+          row.dataset.deviceId = device.device_id; // attach device_id
           row.innerHTML = `
             <td>${index + 1}</td>
             <td>${device.model_name}</td>
@@ -55,8 +52,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         checklistContainer.style.display = 'block';
+        finishBtn.disabled = false;
 
-        // Enable/disable issue fields
+        // Enable/disable issue input
         document.querySelectorAll('.status-select').forEach((select, idx) => {
           select.addEventListener('change', () => {
             const issueInput = document.querySelectorAll('.issue-field')[idx];
@@ -67,10 +65,9 @@ document.addEventListener('DOMContentLoaded', () => {
       });
   });
 
-  // Save checklist
-  const checklistForm = document.getElementById('checklistForm');
-  checklistForm.addEventListener('submit', (e) => {
-    e.preventDefault();
+  // Finish checklist
+  finishBtn.addEventListener('click', () => {
+    if (!confirm('Are you sure you want to complete this checklist? This action cannot be undone.')) return;
 
     const checklistInfo = {
       checklist_name: document.getElementById('checklistName').value,
@@ -96,12 +93,17 @@ document.addEventListener('DOMContentLoaded', () => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(checklistInfo)
     })
-    .then(res => res.json())
-    .then(data => {
-      showToast(`✅ Checklist "${checklistInfo.checklist_name}" saved successfully.`);
-      saveChecklistBtn.disabled = true;
-      finishChecklistBtn.disabled = false;
-    });
+      .then(res => res.json())
+      .then(data => {
+        showToast('✅ Checklist completed successfully.');
+        setTimeout(() => {
+          window.location.href = '/history.html';
+        }, 1500);
+      })
+      .catch(err => {
+        showToast('❌ Error saving checklist.');
+        console.error(err);
+      });
   });
 
   function showToast(message) {
@@ -119,32 +121,29 @@ document.addEventListener('DOMContentLoaded', () => {
     toastContainer.appendChild(toast);
     setTimeout(() => toast.remove(), 4000);
   }
+});
 
-  document.getElementById('exportCsvBtn').addEventListener('click', () => {
-    const rows = [['S.No', 'Model', 'Serial', 'Category', 'Status', 'Issue']];
-    const trList = checklistTableBody.querySelectorAll('tr');
+// Export CSV
+document.getElementById('exportCsvBtn').addEventListener('click', () => {
+  const checklistTableBody = document.getElementById('checklistTableBody');
+  const rows = [['S.No', 'Model', 'Serial', 'Category', 'Status', 'Issue']];
+  const trList = checklistTableBody.querySelectorAll('tr');
 
-    trList.forEach((row, i) => {
-      const model = row.cells[1].innerText;
-      const serial = row.cells[2].innerText;
-      const category = row.cells[3].innerText;
-      const status = row.querySelector('.status-select').value;
-      const issue = row.querySelector('.issue-field').value;
-      rows.push([i + 1, model, serial, category, status, issue]);
-    });
-
-    const csv = rows.map(r => r.map(v => `"${v}"`).join(',')).join('\n');
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'Checklist.csv';
-    a.click();
+  trList.forEach((row, i) => {
+    const model = row.cells[1].innerText;
+    const serial = row.cells[2].innerText;
+    const category = row.cells[3].innerText;
+    const status = row.querySelector('.status-select').value;
+    const issue = row.querySelector('.issue-field').value;
+    rows.push([i + 1, model, serial, category, status, issue]);
   });
 
-  document.getElementById('finishChecklistBtn').addEventListener('click', () => {
-    alert('✅ Checklist marked as completed!');
-    window.location.href = '/history.html';
-  });
+  const csv = rows.map(r => r.map(v => `"${v}"`).join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'Checklist.csv';
+  a.click();
 });
