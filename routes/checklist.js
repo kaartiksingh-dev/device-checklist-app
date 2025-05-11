@@ -39,21 +39,17 @@ router.post('/', (req, res) => {
       `;
 
       // Match devices from the template
-      db.query(`SELECT device_id FROM template_devices WHERE template_id = ?`, [template_id], (err2, templateDevices) => {
-        if (err2) return res.status(500).json({ error: err2 });
-
-        const values = templateDevices.map((device, idx) => [
-          checklistId,
-          device.device_id,
-          items[idx].check_status,
-          items[idx].issue_description || null
-        ]);
-
-        db.query(insertItemsQuery, [values], (err3) => {
-          if (err3) return res.status(500).json({ error: err3 });
-
-          res.json({ message: 'Checklist saved successfully', checklist_id: checklistId });
-        });
+      const values = items.map(item => [
+        checklistId,
+        item.device_id,
+        item.check_status,
+        item.issue_description || null
+      ]);
+      
+      db.query(insertItemsQuery, [values], (err3) => {
+        if (err3) return res.status(500).json({ error: err3 });
+      
+        res.json({ message: 'Checklist saved successfully', checklist_id: checklistId });
       });
     }
   );
