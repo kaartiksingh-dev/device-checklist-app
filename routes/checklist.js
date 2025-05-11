@@ -76,3 +76,25 @@ router.post('/', (req, res) => {
 });
 
 module.exports = router;
+
+// GET /api/checklists/history/:id → fetch checklist items + device info
+router.get('/history/:id', (req, res) => {
+  const { id } = req.params;
+
+  const query = `
+    SELECT d.model_name, d.serial_number, d.category,
+           ci.check_status, ci.issue_description
+    FROM checklist_items ci
+    JOIN devices d ON ci.device_id = d.device_id
+    WHERE ci.checklist_id = ?
+  `;
+
+  db.query(query, [id], (err, results) => {
+    if (err) {
+      console.error('❌ Error fetching checklist details:', err);
+      return res.status(500).json({ error: 'Failed to load checklist items' });
+    }
+
+    res.json(results);
+  });
+});
