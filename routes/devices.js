@@ -13,14 +13,26 @@ router.get('/', (req, res) => {
 // POST add new device
 router.post('/', (req, res) => {
   const { model_name, serial_number, category, description } = req.body;
+
   if (!model_name || !serial_number) {
     return res.status(400).json({ error: 'Model name and serial number are required.' });
   }
 
   const query = 'INSERT INTO devices (model_name, serial_number, category, description) VALUES (?, ?, ?, ?)';
   db.query(query, [model_name, serial_number, category, description], (err, result) => {
-    if (err) return res.status(500).json({ error: err });
-    res.json({ message: 'Device added successfully', device_id: result.insertId });
+    if (err) {
+      console.error('❌ Insert Error:', err); // 👈 added for Render log visibility
+      return res.status(500).json({ error: err });
+    }
+
+    // Optional: fetch updated list
+    db.query('SELECT * FROM devices ORDER BY device_id DESC', (err, devices) => {
+      if (err) {
+        console.error('❌ Fetch Error:', err); // 👈 also added just in case
+        return res.status(500).json({ error: err });
+      }
+      res.json(devices); // This matches what inventory.js expects
+    });
   });
 });
 
