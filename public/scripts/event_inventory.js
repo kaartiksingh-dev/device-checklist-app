@@ -3,6 +3,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const searchInput = document.getElementById('searchInput');
   const exportAllBtn = document.getElementById('exportAllBtn');
   const addNewBtn = document.getElementById('addNewBtn');
+  const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
+  const deleteAllBtn = document.getElementById('deleteAllBtn');
   const csvFile = document.getElementById('csvFile');
   const previewBtn = document.getElementById('previewBtn');
   const uploadBtn = document.getElementById('uploadBtn');
@@ -12,9 +14,28 @@ document.addEventListener('DOMContentLoaded', () => {
   const inventoryForm = document.getElementById('inventoryForm');
   const modal = new bootstrap.Modal(document.getElementById('inventoryModal'));
   const inventoryId = document.getElementById('inventoryId');
+  const selectAllCheckbox = document.getElementById('selectAll');
+  const deleteAllBottomBtn = document.getElementById('deleteAllBottomBtn');
+  const toastContainer = document.getElementById('toastContainer');
 
   let parsedItems = [];
   let editingId = null;
+
+  function showToast(message, type = 'success') {
+    const toast = document.createElement('div');
+    toast.className = `toast align-items-center text-white bg-${type} border-0 show`;
+    toast.setAttribute('role', 'alert');
+    toast.setAttribute('aria-live', 'assertive');
+    toast.setAttribute('aria-atomic', 'true');
+    toast.innerHTML = `
+      <div class="d-flex">
+        <div class="toast-body">${message}</div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+    `;
+    toastContainer.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+  }
 
   function loadInventory() {
     fetch('/api/event_inventory')
@@ -27,6 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
     data.forEach((item, index) => {
       const row = document.createElement('tr');
       row.innerHTML = `
+        <td><input type="checkbox" class="selectItem" data-id="${item.s_no}"></td>
         <td>${index + 1}</td>
         <td>${item.material}</td>
         <td>${item.make || ''}</td>
@@ -76,10 +98,55 @@ document.addEventListener('DOMContentLoaded', () => {
       btn.addEventListener('click', (e) => {
         const id = e.target.getAttribute('data-id');
         if (!confirm('Delete this item?')) return;
-        fetch(`/api/event_inventory/${id}`, { method: 'DELETE' }).then(loadInventory);
+        fetch(`/api/event_inventory/${id}`, { method: 'DELETE' })
+          .then(() => {
+            showToast('Item deleted', 'danger');
+            loadInventory();
+          });
       })
     );
   }
+
+  if (selectAllCheckbox) {
+    selectAllCheckbox.addEventListener('change', () => {
+      const visibleRows = tableBody.querySelectorAll('tr');
+      visibleRows.forEach(row => {
+        if (row.style.display !== 'none') {
+          const checkbox = row.querySelector('.selectItem');
+          if (checkbox) checkbox.checked = selectAllCheckbox.checked;
+        }
+      });
+    });
+  }
+
+  deleteSelectedBtn.addEventListener('click', () => {
+    const selected = document.querySelectorAll('.selectItem:checked');
+    if (selected.length === 0) return alert('Please select at least one entry.');
+    if (!confirm(`Delete ${selected.length} selected item(s)?`)) return;
+
+    const ids = Array.from(selected).map(cb => cb.getAttribute('data-id'));
+    fetch('/api/event_inventory/bulk-delete', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ids })
+    }).then(() => {
+      showToast('Selected items deleted', 'danger');
+      loadInventory();
+    });
+  });
+
+  function handleDeleteAll() {
+    if (!confirm('Are you sure you want to delete all inventory entries? This action cannot be undone.')) return;
+    fetch('/api/event_inventory/delete-all', {
+      method: 'DELETE'
+    }).then(() => {
+      showToast('All items deleted', 'danger');
+      loadInventory();
+    });
+  }
+
+  deleteAllBtn?.addEventListener('click', handleDeleteAll);
+  deleteAllBottomBtn?.addEventListener('click', handleDeleteAll);
 
   addNewBtn.addEventListener('click', () => {
     editingId = null;
@@ -110,6 +177,7 @@ document.addEventListener('DOMContentLoaded', () => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(item)
     }).then(() => {
+      showToast(editingId ? 'Item updated' : 'New item added', 'success');
       modal.hide();
       loadInventory();
     });
@@ -122,7 +190,7 @@ document.addEventListener('DOMContentLoaded', () => {
     rows.forEach(row => {
       const match = Array.from(row.children).some(td => td.textContent.toLowerCase().includes(term));
       row.style.display = match ? '' : 'none';
-      if (match) row.children[0].textContent = visibleIndex++;
+      if (match) row.children[1].textContent = visibleIndex++;
     });
   });
 
@@ -133,10 +201,10 @@ document.addEventListener('DOMContentLoaded', () => {
     trList.forEach(row => {
       if (row.style.display === 'none') return;
       const cells = row.querySelectorAll('td');
-      if (cells.length >= 10) {
+      if (cells.length >= 12) {
         rows.push([
           visibleIndex++,
-          ...Array.from(cells).slice(1, 10).map(td => `"${td.textContent}"`)
+          ...Array.from(cells).slice(2, 11).map(td => `"${td.textContent}"`)
         ]);
       }
     });
@@ -215,6 +283,7 @@ document.addEventListener('DOMContentLoaded', () => {
         resultSummary.className = 'alert alert-info mt-2';
         resultSummary.style.display = 'block';
         uploadBtn.disabled = true;
+        showToast('Import completed', failed.length ? 'warning' : 'success');
         loadInventory();
       });
   });

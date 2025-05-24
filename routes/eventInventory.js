@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const db = require('../config');
 
-// GET all event inventory items
+// GET all items
 router.get('/', (req, res) => {
   db.query('SELECT * FROM event_inventory ORDER BY s_no ASC', (err, results) => {
     if (err) return res.status(500).json({ error: err });
@@ -30,6 +30,50 @@ router.post('/', (req, res) => {
   });
 });
 
+// ✅ DELETE ALL — needs to appear before `/:id`
+router.delete('/delete-all', (req, res) => {
+  db.query('DELETE FROM event_inventory', (err) => {
+    if (err) {
+      console.error('❌ DELETE error:', err);
+      return res.status(500).json({ error: err });
+    }
+
+    // Optional: Reset numbering (not required unless you want)
+    db.query('ALTER TABLE event_inventory AUTO_INCREMENT = 1', (err2) => {
+      if (err2) return res.status(500).json({ error: err2 });
+      res.json({ message: 'All items deleted and auto-increment reset' });
+    });
+  });
+});
+
+// ✅ BULK DELETE route (selected checkboxes)
+router.post('/bulk-delete', (req, res) => {
+  const { ids } = req.body;
+  if (!Array.isArray(ids) || ids.length === 0) {
+    return res.status(400).json({ error: 'Invalid IDs' });
+  }
+
+  const placeholders = ids.map(() => '?').join(',');
+  const deleteQuery = `DELETE FROM event_inventory WHERE s_no IN (${placeholders})`;
+
+  db.query(deleteQuery, ids, (err) => {
+    if (err) return res.status(500).json({ error: err });
+
+    const reorderQuery = `
+      SET @row_number = 0;
+      UPDATE event_inventory 
+      JOIN (SELECT s_no FROM event_inventory ORDER BY s_no) AS ordered
+      ON event_inventory.s_no = ordered.s_no
+      SET event_inventory.s_no = (@row_number := @row_number + 1)
+    `;
+
+    db.query(reorderQuery, (reorderErr) => {
+      if (reorderErr) return res.status(500).json({ error: reorderErr });
+      res.json({ message: 'Selected items deleted and S.No reordered' });
+    });
+  });
+});
+
 // PUT: Update item
 router.put('/:id', (req, res) => {
   const {
@@ -51,14 +95,13 @@ router.put('/:id', (req, res) => {
   });
 });
 
-// DELETE item and reorder s_no
+// DELETE one item
 router.delete('/:id', (req, res) => {
   const { id } = req.params;
 
   db.query('DELETE FROM event_inventory WHERE s_no = ?', [id], (err) => {
     if (err) return res.status(500).json({ error: err });
 
-    // Reorder s_no
     const reorderQuery = `
       SET @row_number = 0;
       UPDATE event_inventory 
@@ -114,7 +157,6 @@ router.post('/import', (req, res) => {
       }
 
       if (successCount + failed.length === items.length) {
-        // After all inserts, reorder s_no
         const reorderQuery = `
           SET @row_number = 0;
           UPDATE event_inventory 
@@ -134,17 +176,14 @@ router.post('/import', (req, res) => {
   }
 });
 
-// GET single item by ID
+// GET single item
 router.get('/:id', (req, res) => {
   const { id } = req.params;
-  const query = 'SELECT * FROM event_inventory WHERE s_no = ?';
-
-  db.query(query, [id], (err, results) => {
+  db.query('SELECT * FROM event_inventory WHERE s_no = ?', [id], (err, results) => {
     if (err) return res.status(500).json({ error: err });
     if (results.length === 0) return res.status(404).json({ error: 'Item not found' });
     res.json(results[0]);
   });
 });
-
 
 module.exports = router;

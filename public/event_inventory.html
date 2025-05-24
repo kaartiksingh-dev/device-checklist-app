@@ -59,10 +59,14 @@
 
   <hr>
 
-  <!-- Manual Add Button -->
+  <!-- Manual Add Button and Bulk Actions -->
   <div class="d-flex justify-content-between align-items-center mb-3">
     <h3 class="mb-0">All Entries</h3>
-    <button class="btn btn-outline-success" id="addNewBtn">+ Add New Entry</button>
+    <div class="d-flex gap-2">
+      <button class="btn btn-outline-danger" id="deleteSelectedBtn">Delete Selected</button>
+      <button class="btn btn-outline-danger" id="deleteAllBtn">Delete All</button>
+      <button class="btn btn-outline-success" id="addNewBtn">+ Add New Entry</button>
+    </div>
   </div>
 
   <!-- Search and Table -->
@@ -70,6 +74,7 @@
   <table class="table table-striped table-bordered">
     <thead class="table-light">
       <tr>
+        <th><input type="checkbox" id="selectAll" /></th>
         <th>S.No</th>
         <th>Material</th>
         <th>Make</th>
@@ -86,6 +91,9 @@
     <tbody id="inventoryTableBody"></tbody>
   </table>
   <button class="btn btn-outline-primary mt-2" id="exportAllBtn">Export All</button>
+  <button class="btn btn-outline-danger mt-2 ms-2" id="deleteAllBottomBtn">Delete All</button>
+
+
 
   <!-- Modal for Add/Edit -->
   <div class="modal fade" id="inventoryModal" tabindex="-1" aria-labelledby="inventoryModalLabel" aria-hidden="true">
@@ -119,5 +127,10 @@
 
   <!-- Bootstrap Modal JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Toast Container -->
+<div id="toastContainer" class="position-fixed bottom-0 end-0 p-3" style="z-index: 9999;"></div>
+
+
 </body>
 </html>
