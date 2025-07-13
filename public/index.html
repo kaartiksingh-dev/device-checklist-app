@@ -3,24 +3,24 @@
 <head>
   <meta charset="UTF-8">
   <title>Device Checklist Dashboard</title>
+  <link rel="icon" type="image/x-icon" href="favicon.png">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
 </head>
 <body class="bg-light">
 
-
   <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px;">
-  <span id="session-info"></span>
-  <button onclick="logout()">Logout</button>
-</div>
-<script src="scripts/session.js"></script>
-<script>getSessionInfo();</script>
-
+    <span id="session-info"></span>
+    <button onclick="logout()">Logout</button>
+  </div>
+  <script src="scripts/session.js"></script>
+  <script>getSessionInfo();</script>
 
   <div class="container py-5">
     <h1 class="mb-4 text-center">📋 Device Checklist System</h1>
-
     <div class="row g-4">
 
+      <!-- Manage Inventory -->
       <div class="col-md-6 col-lg-4">
         <div class="card shadow-sm h-100">
           <div class="card-body text-center">
@@ -31,6 +31,7 @@
         </div>
       </div>
 
+      <!-- Create Templates -->
       <div class="col-md-6 col-lg-4">
         <div class="card shadow-sm h-100">
           <div class="card-body text-center">
@@ -41,6 +42,7 @@
         </div>
       </div>
 
+      <!-- Start Checklist -->
       <div class="col-md-6 col-lg-4">
         <div class="card shadow-sm h-100">
           <div class="card-body text-center">
@@ -51,6 +53,7 @@
         </div>
       </div>
 
+      <!-- Checklist History -->
       <div class="col-md-6 col-lg-4">
         <div class="card shadow-sm h-100">
           <div class="card-body text-center">
@@ -61,7 +64,8 @@
         </div>
       </div>
 
-         <div class="col-md-6 col-lg-4">
+      <!-- Import -->
+      <div class="col-md-6 col-lg-4">
         <div class="card shadow-sm h-100">
           <div class="card-body text-center">
             <h5 class="card-title">Import</h5>
@@ -71,42 +75,30 @@
         </div>
       </div>
 
+      <!-- Event Inventory -->
       <div class="col-md-6 col-lg-4">
         <div class="card shadow-sm h-100">
-        <div class="card-body text-center">
-        <h5 class="card-title">Event Inventory</h5>
-        <p class="card-text">Manage event-related equipment and inventory.</p>
-        <a href="event_inventory.html" class="btn btn-dark">Open Event Inventory</a>
-    </div>
-  </div>
-</div>
+          <div class="card-body text-center">
+            <h5 class="card-title">Event Inventory</h5>
+            <p class="card-text">Manage event-related equipment and inventory.</p>
+            <a href="event_inventory.html" class="btn btn-dark">Open Event Inventory</a>
+          </div>
+        </div>
+      </div>
 
-<div class="col-md-6 col-lg-4">
+      <!-- Admin Panel -->
+      <div class="col-md-6 col-lg-4">
         <div class="card shadow-sm h-100">
-        <div class="card-body text-center">
-        <h5 class="card-title">Admin Panel</h5>
-        <p class="card-text">Manage Users and other Admin Stuff.</p>
-        <a href="admin.html" class="btn btn-warning d-none">Admin Panel</a>
-    </div>
-  </div>
-</div>
-    </div>
-  </div>
+          <div class="card-body text-center">
+            <h5 class="card-title">Admin Panel</h5>
+            <p class="card-text">Manage Users and other Admin Stuff.</p>
+            <a href="admin.html" class="btn btn-warning">Admin Panel</a>
+          </div>
+        </div>
+      </div>
 
-<script>
-  // Fetch session info
-  fetch('/auth/session')
-    .then(res => res.json())
-    .then(data => {
-      if (data.user && data.user.role === 'Admin') {
-        document.getElementById('adminBtn').classList.remove('d-none');
-      }
-    })
-    .catch(err => {
-      console.error('Session check failed', err);
-    });
-</script>
-
+    </div> <!-- end of .row -->
+  </div> <!-- end of .container -->
 
 </body>
 </html>

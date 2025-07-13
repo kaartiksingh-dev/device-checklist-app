@@ -7,6 +7,9 @@ const connection = require('./config');
 const app = express();
 const PORT = 3000;
 
+// ✅ Serve static files from 'public' folder
+app.use(express.static('public'));
+
 // ✅ Session middleware
 app.use(session({
   secret: 'superSecret123', // change in production
@@ -17,6 +20,7 @@ app.use(session({
 // ✅ Body parsing middleware
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
 
 // ✅ Public access to login, JS, CSS, etc.
 app.use('/login.html', express.static(path.join(__dirname, 'public', 'login.html')));
