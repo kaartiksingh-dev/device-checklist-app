@@ -7,6 +7,15 @@
 </head>
 <body class="bg-light">
 
+
+  <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px;">
+  <span id="session-info"></span>
+  <button onclick="logout()">Logout</button>
+</div>
+<script src="scripts/session.js"></script>
+<script>getSessionInfo();</script>
+
+
   <div class="container py-5">
     <h1 class="mb-4 text-center">📋 Device Checklist System</h1>
 
@@ -72,9 +81,32 @@
   </div>
 </div>
 
-
+<div class="col-md-6 col-lg-4">
+        <div class="card shadow-sm h-100">
+        <div class="card-body text-center">
+        <h5 class="card-title">Admin Panel</h5>
+        <p class="card-text">Manage Users and other Admin Stuff.</p>
+        <a href="admin.html" class="btn btn-warning d-none">Admin Panel</a>
     </div>
   </div>
+</div>
+    </div>
+  </div>
+
+<script>
+  // Fetch session info
+  fetch('/auth/session')
+    .then(res => res.json())
+    .then(data => {
+      if (data.user && data.user.role === 'Admin') {
+        document.getElementById('adminBtn').classList.remove('d-none');
+      }
+    })
+    .catch(err => {
+      console.error('Session check failed', err);
+    });
+</script>
+
 
 </body>
 </html>

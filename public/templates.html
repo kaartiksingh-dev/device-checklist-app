@@ -8,6 +8,13 @@
       </head>     
       <body class="container py-4">
 
+         <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px;">
+  <span id="session-info"></span>
+  <button onclick="logout()">Logout</button>
+</div>
+<script src="scripts/session.js"></script>
+<script>getSessionInfo();</script>
+
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
           <div class="container-fluid">
             <a class="navbar-brand" href="index.html">📋 Device Checklist</a>

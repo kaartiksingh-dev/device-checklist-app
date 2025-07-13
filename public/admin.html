@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin Panel</title>
+  <link rel="stylesheet" href="styles/style.css"> <!-- Your global styles -->
+</head>
+<body>
+  <div class="container">
+    <h2>Admin Panel - Manage Users</h2>
+    <p id="user-info">Logged in as: <span id="username"></span></p>
+    <button onclick="logout()">Logout</button>
+
+    <h3>Create New User</h3>
+    <form id="create-user-form">
+      <input type="text" id="new-username" placeholder="Username" required>
+      <input type="password" id="new-password" placeholder="Password" required>
+      <select id="new-role" required>
+        <option value="">Select Role</option>
+        <option value="Admin">Admin</option>
+        <option value="Editor">Editor</option>
+        <option value="Viewer">Viewer</option>
+      </select>
+      <button type="submit">Create</button>
+    </form>
+
+    <h3>All Users</h3>
+    <table border="1" id="user-table">
+      <thead>
+        <tr>
+          <th>Username</th>
+          <th>Role</th>
+          <th>Change Role</th>
+          <th>Reset Password</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <script src="scripts/admin.js"></script>
+</body>
+</html>
